@@ -2,35 +2,38 @@ import { Router, Request, Response} from 'express';
 
 const router = Router();
 
-router.get('/mensajes', (req: Request, res: Response) => {
+//creacion de rest tipo  GET
+router.get('/mensajes', ( req: Request , res: Response )=> {
     res.json({
         ok: true,
-        mensaje: 'OK'
+        mensaje: 'todo al cien'
     });
 });
 
-router.post('/mensajes', (req: Request, res: Response) => {
-    const cuerpo = req.body.cuerpo;
+router.post('/mensajes', ( req: Request , res: Response )=> {
+    const payload = req.body.payload;
     const de = req.body.de;
 
     res.json({
         ok: true,
-        cuerpo,
+        payload,
         de
     });
 });
 
-router.post('/mensajes/:id', (req: Request, res: Response) => {
-    const cuerpo = req.body.cuerpo;
+//servicio rest para enviar parametros por peticion POST
+router.post('/mensajes/:id', ( req: Request , res: Response )=> {
+    const payload = req.body.payload;
     const de = req.body.de;
     const id = req.params.id;
 
     res.json({
         ok: true,
-        cuerpo,
+        payload,
         de,
         id
     });
 });
+
 
 export default router;
