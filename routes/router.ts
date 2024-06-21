@@ -1,5 +1,6 @@
+import  Server  from '../classes/server';
 import { Router, Request, Response} from 'express';
-import  Server  from '../classes/server'
+import { usuariosConectados } from '../sockets/sockets';
 
 const router = Router();
 
@@ -9,6 +10,33 @@ router.get('/mensajes', ( req: Request , res: Response )=> {
         ok: true,
         mensaje: 'todo al cien'
     });
+});
+
+//Servicio para obtener el ID
+/*router.get('/usuarios', (req: Request, res: Response) => {
+    const server = Server.instance;
+    server.io.clients((err, clientes:Socket)=>{
+        if(err){
+            res.json({
+                ok: false,
+                err
+            })
+        }
+
+        res.json({
+            ok: true,
+            clientes
+        })
+    })
+
+});*/
+
+router.get('/usuarios/detalle', (req: Request, res: Response)=>{
+    res.json({
+        ok: true,
+        clientes : usuariosConectados.getLista()
+    });
+
 });
 
 router.post('/mensajes', ( req: Request , res: Response )=> {
