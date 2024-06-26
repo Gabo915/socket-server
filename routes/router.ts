@@ -1,54 +1,64 @@
-import  Server  from '../classes/server';
 import { Router, Request, Response} from 'express';
-import { usuariosConectados } from '../sockets/sockets';
+import { GraficaData } from '../classes/grafica';
 
 const router = Router();
+const grafica = new GraficaData();
 
 //creacion de rest tipo  GET
-router.get('/mensajes', ( req: Request , res: Response )=> {
-    res.json({
-        ok: true,
-        mensaje: 'todo al cien'
-    });
+router.get('/grafica', (req: Request, res: Response) => {
+    // Genera las categorías basadas en la hora actual y las últimas 12 horas
+    const categories = generateHourlyCategories();
+
+    // Genera datos aleatorios para transacciones aprobadas y rechazadas
+    const series = {
+        aprobadas: generateRandomData(),
+        rechazadas: generateRandomData()
+    };
+
+    // Calcula los totales sumando las transacciones aprobadas y rechazadas
+    const totales = series.aprobadas.map((aprobada, index) => aprobada + series.rechazadas[index]);
+
+    const data = {
+        series: [
+            {
+                name: "Rechazadas",
+                data: series.rechazadas
+            },
+            {
+                name: "Aprobadas",
+                data: series.aprobadas
+            },
+            {
+                name: "Totales",
+                data: totales
+            }
+        ],
+        categories: categories
+    };
+
+    res.json(data);
 });
 
-//Servicio para obtener el ID
-/*router.get('/usuarios', (req: Request, res: Response) => {
-    const server = Server.instance;
-    server.io.clients((err, clientes:Socket)=>{
-        if(err){
-            res.json({
-                ok: false,
-                err
-            })
-        }
+// Función para generar las categorías basadas en la hora actual y las últimas 12 horas
+function generateHourlyCategories() {
+    const currentHour = new Date().getHours();
+    const categories = [];
 
-        res.json({
-            ok: true,
-            clientes
-        })
-    })
+    for (let i = 0; i < 12; i++) {
+        const hour = (currentHour - 12 + i) % 24; // Asegura que los valores estén en el rango de 0-23
+        categories.push(`${hour.toString().padStart(2, '0')}:00`);
+    }
 
-});*/
+    return categories;
+}
 
-router.get('/usuarios/detalle', (req: Request, res: Response)=>{
-    res.json({
-        ok: true,
-        clientes : usuariosConectados.getLista()
-    });
-
-});
+function generateRandomData() {
+    return Array.from({ length: 12 }, () => Math.floor(Math.random() * 100));
+}
 
 router.post('/mensajes', ( req: Request , res: Response )=> {
     const payload = req.body.payload;
     const de = req.body.de;
-    const cuerpo = {
-        de,
-        payload
-    };
-
-    const server = Server.instance;
-    server.io.emit('mensaje-nuevo', cuerpo)
 
     res.json({
         ok: true,
@@ -62,13 +72,6 @@ router.post('/mensajes/:id', ( req: Request , res: Response )=> {
     const payload = req.body.payload;
     const de = req.body.de;
     const id = req.params.id;
-    const cuerpo = {
-        de,
-        payload
-    };
-
-    const server = Server.instance;
-    server.io.in(id).emit('mensaje-privado', cuerpo)
 
     res.json({
         ok: true,
